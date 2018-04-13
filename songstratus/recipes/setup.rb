@@ -10,25 +10,25 @@ include_recipe "unicorn"
 apt_package 'zlib1g-dev'
 apt_package 'libpq-dev'
 
-template "songstratus_site_service" do
-    path "/etc/init.d/songstratus_site"
-    source "songstratus_site_service.erb"
+template "songstratus_service" do
+    path "/etc/init.d/songstratus"
+    source "songstratus_service.erb"
     owner "root"
     group "root"
     mode "0755"
 end
 
-service "songstratus_site" do
+service "songstratus" do
   supports :restart => true, :start => true, :stop => true, :reload => true
   action [ :enable ]
 end
 
-template "#{node['nginx']['dir']}/sites-available/songstratus_site" do
+template "#{node['nginx']['dir']}/sites-available/songstratus" do
   source 'songstratus_site.erb'
   notifies :reload, 'service[nginx]', :delayed
 end
 
-nginx_site 'songstratus_site' do
+nginx_site 'songstratus' do
   action :enable
 end
 
@@ -41,6 +41,6 @@ end
 
 unicorn_config "/opt/unicorn.rb" do
   listen ({"unix:/tmp/sockets/unicorn.sock": nil})
-  working_directory node[:songstratus_site][:path]
+  working_directory node[:songstratus][:path]
   # /config/unicorn.rb
 end
